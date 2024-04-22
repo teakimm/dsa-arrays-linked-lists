@@ -1,7 +1,6 @@
 /** IndexError: raised when index not found. */
 
-class IndexError extends Error {
-}
+class IndexError extends Error {}
 
 /**
  * NodeStr: node for a singly-linked list of string.
@@ -32,7 +31,7 @@ class LLStr {
   constructor(vals: string[] = []) {
     this.head = null;
     this.tail = null;
-    this.length = vals.length;
+    this.length = 0;
 
     for (const val of vals) this.push(val);
   }
@@ -40,31 +39,23 @@ class LLStr {
   /** push(val): add new value to end of list. */
 
   push(val: string): void {
-    const newNode = new NodeStr(val);
-
+    return this.insertAt(this.length, val);
+    /*  const newNode = new NodeStr(val);
     if (this.head === null) {
       this.head = newNode;
     }
-
     if (this.tail !== null) {
       this.tail.next = newNode;
     }
+    this.length++;
 
-    this.tail = newNode;
+    this.tail = newNode; */
   }
 
   /** unshift(val): add new value to start of list. */
 
   unshift(val: string): void {
-    const newNode = new NodeStr(val);
-
-    newNode.next = this.head;
-
-    this.head = newNode;
-
-    if (this.tail === null) {
-      this.tail = newNode;
-    }
+    return this.insertAt(0, val);
   }
 
   /** pop(): return & remove last item.
@@ -73,10 +64,7 @@ class LLStr {
    **/
 
   pop(): string {
-    if (this.head === null) {
-      throw new IndexError();
-    }
-    return "x";
+    return this.removeAt(this.length - 1);
   }
 
   /** shift(): return & remove first item.
@@ -85,7 +73,7 @@ class LLStr {
    **/
 
   shift(): string {
-    return "x";
+    return this.removeAt(0);
   }
 
   /** getAt(idx): get val at idx.
@@ -94,7 +82,7 @@ class LLStr {
    **/
 
   getAt(idx: number): string {
-    if (idx >= this.length) {
+    if (idx >= this.length || idx < 0) {
       throw new IndexError();
     }
 
@@ -115,7 +103,10 @@ class LLStr {
    **/
 
   setAt(idx: number, val: string): void {
-    if (idx >= this.length) {
+    console.log("this.length: ", this.length);
+    console.log("idx: ", idx);
+
+    if (idx >= this.length || idx < 0) {
       throw new IndexError();
     }
 
@@ -136,11 +127,9 @@ class LLStr {
    **/
 
   insertAt(idx: number, val: string): void {
-    console.log("test@@@@@@@@@@@@@@@@@@@@@", this.length);
-    if (idx >= this.length) {
+    if (idx > this.length || idx < 0) {
       throw new IndexError();
     }
-
 
     const newNode = new NodeStr(val);
 
@@ -150,28 +139,22 @@ class LLStr {
       if (this.length === 0) {
         this.tail = newNode;
       }
-    }
-
-    if (idx === this.length) {
+    } else if (idx === this.length) {
       this.tail!.next = newNode;
       this.tail = newNode;
+    } else {
+      let current: NodeStr | null = this.head;
+      let count = 0;
+
+      console.log(current);
+      while (current !== null && count !== idx - 1) {
+        count++;
+        current = current.next;
+      }
+
+      newNode.next = current!.next;
+      current!.next = newNode;
     }
-
-
-
-
-    let current: NodeStr | null = this.head;
-    let count = 0;
-
-    console.log(current);
-    while (current !== null && count !== idx - 1) {
-      count++;
-      current = current.next;
-    }
-
-    newNode.next = current!.next;
-    current!.next = newNode;
-
     this.length++;
   }
 
@@ -181,7 +164,41 @@ class LLStr {
    **/
 
   removeAt(idx: number): string {
-    return "x";
+    if (idx >= this.length || idx < 0) {
+      throw new IndexError();
+    }
+
+    if (idx === 0) {
+      const headNode = this.head!;
+      this.head = headNode!.next;
+
+      if (this.head === null) {
+        this.tail = null;
+      }
+      this.length--;
+
+      return headNode.val;
+    } else {
+      let previous: NodeStr | null = this.head;
+      let count = 0;
+
+      while (previous !== null && count !== idx - 1) {
+        count++;
+        previous = previous.next;
+      }
+
+      const current = previous!.next;
+
+      previous!.next = current!.next;
+
+      if (idx === this.length - 1) {
+        this.tail = previous;
+      }
+
+      this.length--;
+
+      return current!.val;
+    }
   }
 
   /** toArray (useful for tests!) */
@@ -199,9 +216,4 @@ class LLStr {
   }
 }
 
-
-export {
-  IndexError,
-  LLStr,
-  NodeStr,
-};
+export {IndexError, LLStr, NodeStr};
